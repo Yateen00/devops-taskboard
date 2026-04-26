@@ -69,11 +69,11 @@ pipeline {
         stage('Build Docker Images') {
             steps {
                 script {
-                    docker.build("${DOCKER_REGISTRY}/taskflow-auth:${IMAGE_TAG}", "./auth-service")
-                    docker.build("${DOCKER_REGISTRY}/taskflow-team:${IMAGE_TAG}", "./team-service")
-                    docker.build("${DOCKER_REGISTRY}/taskflow-task:${IMAGE_TAG}", "./task-service")
-                    docker.build("${DOCKER_REGISTRY}/taskflow-chat:${IMAGE_TAG}", "./chat-service")
-                    docker.build("${DOCKER_REGISTRY}/taskflow-frontend:${IMAGE_TAG}", "./frontend")
+                    sh "docker build -t ${DOCKER_REGISTRY}/taskflow-auth:${IMAGE_TAG} ./auth-service"
+                    sh "docker build -t ${DOCKER_REGISTRY}/taskflow-team:${IMAGE_TAG} ./team-service"
+                    sh "docker build -t ${DOCKER_REGISTRY}/taskflow-task:${IMAGE_TAG} ./task-service"
+                    sh "docker build -t ${DOCKER_REGISTRY}/taskflow-chat:${IMAGE_TAG} ./chat-service"
+                    sh "docker build -t ${DOCKER_REGISTRY}/taskflow-frontend:${IMAGE_TAG} ./frontend"
                 }
             }
         }
