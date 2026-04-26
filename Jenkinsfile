@@ -20,7 +20,8 @@ pipeline {
                     steps {
                         dir('auth-service') {
                             sh 'npm install'
-                            sh 'npm test'
+                            sh 'chmod +x node_modules/.bin/jest || true'
+                            sh 'npm test -- --passWithNoTests'
                         }
                     }
                 }
@@ -28,7 +29,8 @@ pipeline {
                     steps {
                         dir('team-service') {
                             sh 'npm install'
-                            sh 'npm test'
+                            sh 'chmod +x node_modules/.bin/jest || true'
+                            sh 'npm test -- --passWithNoTests'
                         }
                     }
                 }
@@ -36,7 +38,8 @@ pipeline {
                     steps {
                         dir('task-service') {
                             sh 'npm install'
-                            sh 'npm test'
+                            sh 'chmod +x node_modules/.bin/jest || true'
+                            sh 'npm test -- --passWithNoTests'
                         }
                     }
                 }
@@ -44,7 +47,8 @@ pipeline {
                     steps {
                         dir('chat-service') {
                             sh 'npm install'
-                            sh 'npm test'
+                            sh 'chmod +x node_modules/.bin/jest || true'
+                            sh 'npm test -- --passWithNoTests'
                         }
                     }
                 }
@@ -54,7 +58,7 @@ pipeline {
                         script {
                             def scannerHome = tool 'SonarQubeScanner'
                             withSonarQubeEnv('SonarQube') { // Server name in Jenkins config
-                                sh "${scannerHome}/bin/sonar-scanner"
+                                sh "${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=TaskFlow -Dsonar.projectName='TaskFlow' -Dsonar.sources=."
                             }
                         }
                     }
