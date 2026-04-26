@@ -78,12 +78,13 @@ services:
     restart: unless-stopped
 
   sonarqube:
-    image: sonarqube:lts-community
+    image: sonarqube:community
     container_name: taskflow-sonarqube
     ports:
       - "9000:9000"
     environment:
       - SONAR_ES_BOOTSTRAP_CHECKS_DISABLE=true
+      - SONAR_SEARCH_JAVAADDITIONALOPTS=-Des.cluster.routing.allocation.disk.threshold_enabled=false
     volumes:
       - sonarqube_data:/opt/sonarqube/data
       - sonarqube_extensions:/opt/sonarqube/extensions
