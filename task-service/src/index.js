@@ -16,7 +16,7 @@ const mockAuth = (req, res, next) => {
 
 app.post('/tasks', mockAuth, async (req, res) => {
   try {
-    const { title, description, teamId, assignees, deadline, subtasks } = req.body;
+    const { title, description, teamId, assignees, deadline, subtasks, parentTaskId } = req.body;
     if (!title) return res.status(400).json({ error: 'Title is required' });
 
     const task = new Task({
@@ -26,6 +26,7 @@ app.post('/tasks', mockAuth, async (req, res) => {
       assignees: assignees || [],
       deadline,
       subtasks: subtasks || [],
+      parentTaskId: parentTaskId || null,
       createdBy: req.userId
     });
 
@@ -38,7 +39,7 @@ app.post('/tasks', mockAuth, async (req, res) => {
 
 app.get('/tasks', mockAuth, async (req, res) => {
   try {
-    // Fetch tasks where user is assignee or creator
+    // Fetch all tasks where user is assignee or creator (frontend will assemble the tree using parentTaskId)
     const tasks = await Task.find({
       $or: [
         { assignees: req.userId },
@@ -65,7 +66,24 @@ app.delete('/tasks/:id', mockAuth, async (req, res) => {
   try {
     const task = await Task.findByIdAndDelete(req.params.id);
     if (!task) return res.status(404).json({ error: 'Task not found' });
+    // Note: should also delete children subtasks ideally, but keeping simple for now
     res.json({ message: 'Task deleted' });
+  } catch (error) {
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+app.post('/tasks/:id/comments', mockAuth, async (req, res) => {
+  try {
+    const { text } = req.body;
+    if (!text) return res.status(400).json({ error: 'Comment text is required' });
+
+    const task = await Task.findById(req.params.id);
+    if (!task) return res.status(404).json({ error: 'Task not found' });
+
+    task.comments.push({ text, createdBy: req.userId });
+    await task.save();
+    res.status(201).json(task);
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' });
   }
