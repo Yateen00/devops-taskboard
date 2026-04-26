@@ -7,7 +7,7 @@ services:
     ports:
       - "27017:27017"
     volumes:
-      - mongodb_data:/data/db
+      - ${HOME}/taskflow_data/mongodb:/data/db
 
   auth-service:
     build: ./auth-service
@@ -73,7 +73,7 @@ services:
       - "8080:8080"
       - "50000:50000"
     volumes:
-      - jenkins_home:/var/jenkins_home
+      - ${HOME}/taskflow_data/jenkins:/var/jenkins_home
       - /var/run/docker.sock:/var/run/docker.sock
     restart: unless-stopped
 
@@ -86,14 +86,7 @@ services:
       - SONAR_ES_BOOTSTRAP_CHECKS_DISABLE=true
       - SONAR_SEARCH_JAVAADDITIONALOPTS=-Des.cluster.routing.allocation.disk.threshold_enabled=false
     volumes:
-      - sonarqube_data:/opt/sonarqube/data
-      - sonarqube_extensions:/opt/sonarqube/extensions
-      - sonarqube_logs:/opt/sonarqube/logs
+      - ${HOME}/taskflow_data/sonarqube/data:/opt/sonarqube/data
+      - ${HOME}/taskflow_data/sonarqube/extensions:/opt/sonarqube/extensions
+      - ${HOME}/taskflow_data/sonarqube/logs:/opt/sonarqube/logs
     restart: unless-stopped
-
-volumes:
-  mongodb_data:
-  jenkins_home:
-  sonarqube_data:
-  sonarqube_extensions:
-  sonarqube_logs:
