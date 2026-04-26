@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   mongodb:
-    image: mongo:6.0
+    image: mongo:7.0
     container_name: taskflow-mongodb
     ports:
       - "27017:27017"
@@ -66,7 +66,9 @@ services:
       - chat-service
 
   jenkins:
-    image: jenkins/jenkins:lts
+    build:
+      context: .
+      dockerfile: Dockerfile.jenkins
     container_name: taskflow-jenkins
     user: root
     ports:
@@ -78,7 +80,7 @@ services:
     restart: unless-stopped
 
   sonarqube:
-    image: sonarqube:community
+    image: sonarqube:26.4.0.121862-community
     container_name: taskflow-sonarqube
     ports:
       - "9000:9000"
