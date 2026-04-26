@@ -1,0 +1,69 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:6.0
+    container_name: taskflow-mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+
+  auth-service:
+    build: ./auth-service
+    container_name: taskflow-auth
+    ports:
+      - "3001:3001"
+    environment:
+      - MONGO_URI=mongodb://mongodb:27017/taskflow
+      - PORT=3001
+      - JWT_SECRET=supersecret
+    depends_on:
+      - mongodb
+
+  team-service:
+    build: ./team-service
+    container_name: taskflow-team
+    ports:
+      - "3002:3002"
+    environment:
+      - MONGO_URI=mongodb://mongodb:27017/taskflow
+      - PORT=3002
+    depends_on:
+      - mongodb
+
+  task-service:
+    build: ./task-service
+    container_name: taskflow-task
+    ports:
+      - "3003:3003"
+    environment:
+      - MONGO_URI=mongodb://mongodb:27017/taskflow
+      - PORT=3003
+    depends_on:
+      - mongodb
+
+  chat-service:
+    build: ./chat-service
+    container_name: taskflow-chat
+    ports:
+      - "3004:3004"
+    environment:
+      - MONGO_URI=mongodb://mongodb:27017/taskflow
+      - PORT=3004
+    depends_on:
+      - mongodb
+
+  frontend:
+    build: ./frontend
+    container_name: taskflow-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - auth-service
+      - team-service
+      - task-service
+      - chat-service
+
+volumes:
+  mongodb_data:
