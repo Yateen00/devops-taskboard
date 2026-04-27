@@ -17,7 +17,7 @@ export default function Login({ onLogin }) {
         alert('Signup successful, please login');
         setIsSignup(false);
       } else {
-        onLogin(res.data.token, res.data.userId);
+        onLogin(res.data.token, res.data.userId, res.data.username);
       }
     } catch (err) {
       alert(err.response?.data?.error || 'An error occurred');

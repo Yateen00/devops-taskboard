@@ -9,8 +9,10 @@ app.use(cors());
 
 const mockAuth = (req, res, next) => {
   const userId = req.headers['x-user-id'];
+  const username = req.headers['x-username'];
   if (!userId) return res.status(401).json({ error: 'Unauthorized' });
   req.userId = userId;
+  req.username = username || 'Unknown';
   next();
 };
 
@@ -52,22 +54,56 @@ app.get('/tasks', mockAuth, async (req, res) => {
   }
 });
 
+async function completeChildren(parentId) {
+  const children = await Task.find({ parentTaskId: parentId });
+  for (const child of children) {
+    child.status = 'completed';
+    await child.save();
+    await completeChildren(child._id);
+  }
+}
+
 app.put('/tasks/:id', mockAuth, async (req, res) => {
   try {
-    const task = await Task.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const { status, title, deadline, assignees } = req.body;
+    
+    // Support partial updates
+    const updates = {};
+    if (status !== undefined) updates.status = status;
+    if (title !== undefined) updates.title = title;
+    if (deadline !== undefined) updates.deadline = deadline;
+    if (assignees !== undefined) updates.assignees = assignees;
+
+    const task = await Task.findByIdAndUpdate(req.params.id, updates, { new: true });
     if (!task) return res.status(404).json({ error: 'Task not found' });
+    
+    // Recursive completion
+    if (status === 'completed') {
+      await completeChildren(task._id);
+    }
+    
     res.json(task);
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
 
+async function deleteChildren(parentId) {
+  const children = await Task.find({ parentTaskId: parentId });
+  for (const child of children) {
+    await deleteChildren(child._id);
+    await Task.findByIdAndDelete(child._id);
+  }
+}
+
 app.delete('/tasks/:id', mockAuth, async (req, res) => {
   try {
     const task = await Task.findByIdAndDelete(req.params.id);
     if (!task) return res.status(404).json({ error: 'Task not found' });
-    // Note: should also delete children subtasks ideally, but keeping simple for now
-    res.json({ message: 'Task deleted' });
+    
+    await deleteChildren(task._id);
+
+    res.json({ message: 'Task and children deleted' });
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' });
   }
@@ -81,7 +117,7 @@ app.post('/tasks/:id/comments', mockAuth, async (req, res) => {
     const task = await Task.findById(req.params.id);
     if (!task) return res.status(404).json({ error: 'Task not found' });
 
-    task.comments.push({ text, createdBy: req.userId });
+    task.comments.push({ text, createdBy: req.username });
     await task.save();
     res.status(201).json(task);
   } catch (error) {

@@ -5,7 +5,7 @@ import axios from 'axios';
 const CHAT_URL = 'http://localhost:3004';
 let socket;
 
-export default function Chat({ teamId, userId }) {
+export default function Chat({ teamId, userId, teamMembers }) {
   const [messages, setMessages] = useState([]);
   const [text, setText] = useState('');
 
@@ -42,7 +42,9 @@ export default function Chat({ teamId, userId }) {
       <div className="flex-1 overflow-y-auto space-y-2 mb-4 p-2">
         {messages.map((m, i) => (
           <div key={i} className={`flex flex-col ${m.senderId === userId ? 'items-end' : 'items-start'}`}>
-            <span className="text-xs text-gray-400">{m.senderId === userId ? 'You' : m.senderId}</span>
+            <span className="text-xs text-gray-500 font-medium mb-1">
+              {m.senderId === userId ? 'You' : (teamMembers?.find(mem => mem.userId === m.senderId)?.username || m.senderId)}
+            </span>
             <div className={`p-2 rounded max-w-[80%] ${m.senderId === userId ? 'bg-blue-500 text-white' : 'bg-gray-100'}`}>
               {m.text}
             </div>

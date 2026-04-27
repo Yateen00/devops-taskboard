@@ -11,8 +11,10 @@ app.use(cors());
 // For simplicity we will assume req.headers['x-user-id'] is passed by API Gateway or frontend
 const mockAuth = (req, res, next) => {
   const userId = req.headers['x-user-id'];
+  const username = req.headers['x-username'];
   if (!userId) return res.status(401).json({ error: 'Unauthorized' });
   req.userId = userId;
+  req.username = username || 'Unknown';
   next();
 };
 
@@ -23,11 +25,37 @@ app.post('/teams', mockAuth, async (req, res) => {
 
     const team = new Team({
       name,
-      members: [{ userId: req.userId, role: 'creator' }]
+      members: [{ userId: req.userId, username: req.username, role: 'creator', jobTitle: 'Creator' }]
     });
 
     await team.save();
     res.status(201).json(team);
+  } catch (error) {
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+app.get('/teams/user', mockAuth, async (req, res) => {
+  try {
+    const teams = await Team.find({ 'members.userId': req.userId });
+    res.json(teams);
+  } catch (error) {
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+app.post('/teams/join/:id', mockAuth, async (req, res) => {
+  try {
+    const team = await Team.findById(req.params.id);
+    if (!team) return res.status(404).json({ error: 'Team not found (Invalid Join Code)' });
+
+    const alreadyMember = team.members.some(m => m.userId === req.userId);
+    if (alreadyMember) return res.status(400).json({ error: 'You are already a member of this team' });
+
+    team.members.push({ userId: req.userId, username: req.username, role: 'member', jobTitle: 'Team Member' });
+    await team.save();
+
+    res.status(200).json(team);
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' });
   }
@@ -50,8 +78,8 @@ app.get('/teams/:id', mockAuth, async (req, res) => {
 
 app.post('/teams/:id/members', mockAuth, async (req, res) => {
   try {
-    const { targetUserId, role } = req.body;
-    if (!targetUserId) return res.status(400).json({ error: 'targetUserId is required' });
+    const { targetUserId, targetUsername, role, jobTitle } = req.body;
+    if (!targetUserId || !targetUsername) return res.status(400).json({ error: 'targetUserId and targetUsername are required' });
 
     const validRoles = ['admin', 'member'];
     const newRole = validRoles.includes(role) ? role : 'member';
@@ -67,7 +95,7 @@ app.post('/teams/:id/members', mockAuth, async (req, res) => {
     const alreadyMember = team.members.some(m => m.userId === targetUserId);
     if (alreadyMember) return res.status(400).json({ error: 'User is already a member' });
 
-    team.members.push({ userId: targetUserId, role: newRole });
+    team.members.push({ userId: targetUserId, username: targetUsername, role: newRole, jobTitle: jobTitle || 'Team Member' });
     await team.save();
 
     res.status(201).json(team);
@@ -78,9 +106,9 @@ app.post('/teams/:id/members', mockAuth, async (req, res) => {
 
 app.put('/teams/:id/members/:targetUserId/role', mockAuth, async (req, res) => {
   try {
-    const { role } = req.body;
+    const { role, jobTitle } = req.body;
     const validRoles = ['admin', 'member'];
-    if (!validRoles.includes(role)) return res.status(400).json({ error: 'Invalid role' });
+    if (role && !validRoles.includes(role)) return res.status(400).json({ error: 'Invalid role' });
 
     const team = await Team.findById(req.params.id);
     if (!team) return res.status(404).json({ error: 'Team not found' });
@@ -93,11 +121,12 @@ app.put('/teams/:id/members/:targetUserId/role', mockAuth, async (req, res) => {
     const targetMember = team.members.find(m => m.userId === req.params.targetUserId);
     if (!targetMember) return res.status(404).json({ error: 'Target member not found in team' });
 
-    if (targetMember.role === 'creator') {
+    if (targetMember.role === 'creator' && role) {
       return res.status(403).json({ error: 'Cannot change the role of the creator' });
     }
 
-    targetMember.role = role;
+    if (role) targetMember.role = role;
+    if (jobTitle !== undefined) targetMember.jobTitle = jobTitle;
     await team.save();
 
     res.json(team);

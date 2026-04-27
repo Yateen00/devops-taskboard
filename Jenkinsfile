@@ -21,7 +21,7 @@ pipeline {
                         dir('auth-service') {
                             sh 'npm install'
                             sh 'chmod +x node_modules/.bin/jest || true'
-                            sh 'npm test -- --passWithNoTests'
+                            sh 'npm test -- --coverage --passWithNoTests'
                         }
                     }
                 }
@@ -30,7 +30,7 @@ pipeline {
                         dir('team-service') {
                             sh 'npm install'
                             sh 'chmod +x node_modules/.bin/jest || true'
-                            sh 'npm test -- --passWithNoTests'
+                            sh 'npm test -- --coverage --passWithNoTests'
                         }
                     }
                 }
@@ -39,7 +39,7 @@ pipeline {
                         dir('task-service') {
                             sh 'npm install'
                             sh 'chmod +x node_modules/.bin/jest || true'
-                            sh 'npm test -- --passWithNoTests'
+                            sh 'npm test -- --coverage --passWithNoTests'
                         }
                     }
                 }
@@ -48,18 +48,24 @@ pipeline {
                         dir('chat-service') {
                             sh 'npm install'
                             sh 'chmod +x node_modules/.bin/jest || true'
-                            sh 'npm test -- --passWithNoTests'
+                            sh 'npm test -- --coverage --passWithNoTests'
                         }
                     }
                 }
                 stage('SonarQube Analysis') {
                     steps {
-                        // Assuming SonarQube Scanner is configured in Jenkins tools
                         script {
-                            def scannerHome = tool 'SonarQubeScanner'
-                            withSonarQubeEnv('SonarQube') { // Server name in Jenkins config
-                                sh "${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=TaskFlow -Dsonar.projectName='TaskFlow' -Dsonar.sources=."
-                            }
+                            // Using Docker to run SonarScanner ensures it works without Jenkins tool configuration
+                            sh """
+                            docker run --rm -v \$(pwd):/usr/src \
+                                -e SONAR_HOST_URL="http://taskflow-sonarqube:9000" \
+                                sonarsource/sonar-scanner-cli \
+                                -Dsonar.projectKey=TaskFlow \
+                                -Dsonar.projectName='TaskFlow' \
+                                -Dsonar.sources=. \
+                                -Dsonar.javascript.lcov.reportPaths="auth-service/coverage/lcov.info,team-service/coverage/lcov.info,task-service/coverage/lcov.info,chat-service/coverage/lcov.info" \
+                                -Dsonar.exclusions="**/node_modules/**,**/tests/**,**/coverage/**"
+                            """
                         }
                     }
                 }
