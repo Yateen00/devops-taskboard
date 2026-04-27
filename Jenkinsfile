@@ -67,9 +67,12 @@ pipeline {
                                     sonarsource/sonar-scanner-cli \\
                                     -Dsonar.projectKey=TaskFlow \\
                                     -Dsonar.projectName='TaskFlow' \\
-                                    -Dsonar.sources=. \\
+                                    -Dsonar.sources=auth-service/src,team-service/src,task-service/src,chat-service/src,frontend/src \\
+                                    -Dsonar.tests=auth-service/tests,team-service/tests,task-service/tests,chat-service/tests \\
+                                    -Dsonar.javascript.file.suffixes=.js,.jsx \\
+                                    -Dsonar.scm.disabled=true \\
                                     -Dsonar.javascript.lcov.reportPaths="auth-service/coverage/lcov.info,team-service/coverage/lcov.info,task-service/coverage/lcov.info,chat-service/coverage/lcov.info" \\
-                                    -Dsonar.exclusions="**/node_modules/**,**/tests/**,**/coverage/**"
+                                    -Dsonar.exclusions="**/node_modules/**,**/coverage/**"
                                 """
                             }
                         }
