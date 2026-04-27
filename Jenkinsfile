@@ -14,7 +14,7 @@ pipeline {
             }
         }
 
-        stage('Test & Quality') {
+        stage('Unit Tests') {
             parallel {
                 stage('Auth Service Tests') {
                     steps {
@@ -52,27 +52,35 @@ pipeline {
                         }
                     }
                 }
-                stage('SonarQube Analysis') {
-                    steps {
-                        catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
-                            withCredentials([string(credentialsId: 'sonarqube-token', variable: 'SONAR_TOKEN')]) {
-                                script {
-                                    sh """
-                                    docker run --rm -v \$(pwd):/usr/src \\
-                                        --network devops-taskboard_default \\
-                                        -e SONAR_HOST_URL="http://taskflow-sonarqube:9000" \\
-                                        -e SONAR_TOKEN="\${SONAR_TOKEN}" \\
-                                        sonarsource/sonar-scanner-cli \\
-                                        -Dsonar.projectKey=TaskFlow \\
-                                        -Dsonar.projectName='TaskFlow' \\
-                                        -Dsonar.sources=auth-service/src,team-service/src,task-service/src,chat-service/src,frontend/src \\
-                                        -Dsonar.javascript.file.suffixes=.js,.jsx \\
-                                        -Dsonar.scm.disabled=true \\
-                                        -Dsonar.javascript.lcov.reportPaths="auth-service/coverage/lcov.info,team-service/coverage/lcov.info,task-service/coverage/lcov.info,chat-service/coverage/lcov.info" \\
-                                        -Dsonar.exclusions="**/node_modules/**,**/coverage/**"
-                                    """
-                                }
-                            }
+            }
+        }
+
+        stage('SonarQube Analysis') {
+            steps {
+                catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
+                    withCredentials([string(credentialsId: 'sonarqube-token', variable: 'SONAR_TOKEN')]) {
+                        script {
+                            // Download and run sonar-scanner directly (avoids Docker-in-Docker path issues)
+                            sh '''
+                            if [ ! -f /tmp/sonar-scanner/bin/sonar-scanner ]; then
+                                echo "Downloading SonarScanner CLI..."
+                                curl -sL "https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-6.2.1.4610-linux-x64.zip" -o /tmp/sonar-scanner.zip
+                                cd /tmp && unzip -qo sonar-scanner.zip && mv sonar-scanner-*-linux-x64 sonar-scanner
+                            fi
+                            '''
+                            sh """
+                            /tmp/sonar-scanner/bin/sonar-scanner \
+                                -Dsonar.host.url=http://taskflow-sonarqube:9000 \
+                                -Dsonar.token=\${SONAR_TOKEN} \
+                                -Dsonar.projectKey=TaskFlow \
+                                -Dsonar.projectName='TaskFlow' \
+                                -Dsonar.projectBaseDir=\$(pwd) \
+                                -Dsonar.sources=auth-service/src,team-service/src,task-service/src,chat-service/src,frontend/src \
+                                -Dsonar.javascript.file.suffixes=.js,.jsx \
+                                -Dsonar.scm.disabled=true \
+                                -Dsonar.javascript.lcov.reportPaths=auth-service/coverage/lcov.info,team-service/coverage/lcov.info,task-service/coverage/lcov.info,chat-service/coverage/lcov.info \
+                                -Dsonar.exclusions="**/node_modules/**,**/coverage/**"
+                            """
                         }
                     }
                 }
