@@ -57,13 +57,14 @@ pipeline {
                         script {
                             // Using Docker to run SonarScanner ensures it works without Jenkins tool configuration
                             sh """
-                            docker run --rm -v \$(pwd):/usr/src \
-                                -e SONAR_HOST_URL="http://taskflow-sonarqube:9000" \
-                                sonarsource/sonar-scanner-cli \
-                                -Dsonar.projectKey=TaskFlow \
-                                -Dsonar.projectName='TaskFlow' \
-                                -Dsonar.sources=. \
-                                -Dsonar.javascript.lcov.reportPaths="auth-service/coverage/lcov.info,team-service/coverage/lcov.info,task-service/coverage/lcov.info,chat-service/coverage/lcov.info" \
+                            docker run --rm -v \$(pwd):/usr/src \\
+                                --network devops-taskboard_default \\
+                                -e SONAR_HOST_URL="http://taskflow-sonarqube:9000" \\
+                                sonarsource/sonar-scanner-cli \\
+                                -Dsonar.projectKey=TaskFlow \\
+                                -Dsonar.projectName='TaskFlow' \\
+                                -Dsonar.sources=. \\
+                                -Dsonar.javascript.lcov.reportPaths="auth-service/coverage/lcov.info,team-service/coverage/lcov.info,task-service/coverage/lcov.info,chat-service/coverage/lcov.info" \\
                                 -Dsonar.exclusions="**/node_modules/**,**/tests/**,**/coverage/**"
                             """
                         }
