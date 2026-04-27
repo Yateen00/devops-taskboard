@@ -11,7 +11,11 @@ jest.mock('mongoose', () => {
   
   return {
     connect: jest.fn(),
-    Schema: jest.fn(),
+    Schema: Object.assign(jest.fn(), {
+      Types: {
+        ObjectId: String
+      }
+    }),
     model: jest.fn(() => ({
       find: mockFind,
       findById: mockFindById,
