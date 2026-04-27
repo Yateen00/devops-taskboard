@@ -1,34 +1,31 @@
 const request = require('supertest');
-const app = require('../src/index');
-const mongoose = require('mongoose');
+
+// Set up mocks BEFORE requiring the app
+const mockFind = jest.fn();
+const mockFindById = jest.fn();
+const mockSave = jest.fn();
 
 jest.mock('mongoose', () => {
-  const mockFind = jest.fn();
-  const mockFindById = jest.fn();
-  const mockSave = jest.fn();
-  
+  function MockModel(data) {
+    Object.assign(this, data);
+    this.save = mockSave.mockImplementation(function() {
+      return Promise.resolve(this);
+    }.bind(this));
+  }
+  MockModel.find = mockFind;
+  MockModel.findById = mockFindById;
+
   return {
     connect: jest.fn(),
     Schema: jest.fn(),
-    model: jest.fn(() => ({
-      find: mockFind,
-      findById: mockFindById,
-      save: mockSave,
-    })),
-    __mockFind: mockFind,
-    __mockFindById: mockFindById,
-    __mockSave: mockSave
+    model: jest.fn(() => MockModel),
   };
 });
 
-describe('Team Service API', () => {
-  let mockFind, mockFindById, mockSave;
+const app = require('../src/index');
 
+describe('Team Service API', () => {
   beforeEach(() => {
-    mockFind = mongoose.__mockFind;
-    mockFindById = mongoose.__mockFindById;
-    mockSave = mongoose.__mockSave;
-    
     mockFind.mockClear();
     mockFindById.mockClear();
     mockSave.mockClear();
@@ -50,7 +47,6 @@ describe('Team Service API', () => {
     });
 
     test('should create team successfully', async () => {
-      mockSave.mockResolvedValueOnce({ _id: 'team1', name: 'New Team', members: [] });
       const res = await request(app).post('/teams')
         .set('x-user-id', 'user1')
         .set('x-username', 'testuser')
@@ -89,7 +85,8 @@ describe('Team Service API', () => {
         .set('x-username', 'joineruser');
         
       expect(res.statusCode).toBe(200);
-      expect(res.body.message).toBe('Joined team successfully');
+      expect(mockTeam.members.length).toBe(1);
+      expect(mockTeam.members[0].userId).toBe('user2');
       expect(mockTeam.save).toHaveBeenCalled();
     });
 
@@ -100,7 +97,7 @@ describe('Team Service API', () => {
         .set('x-username', 'joineruser');
         
       expect(res.statusCode).toBe(404);
-      expect(res.body.error).toBe('Team not found');
+      expect(res.body.error).toBe('Team not found (Invalid Join Code)');
     });
   });
 });

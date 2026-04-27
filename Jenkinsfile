@@ -54,19 +54,24 @@ pipeline {
                 }
                 stage('SonarQube Analysis') {
                     steps {
-                        script {
-                            // Using Docker to run SonarScanner ensures it works without Jenkins tool configuration
-                            sh """
-                            docker run --rm -v \$(pwd):/usr/src \\
-                                --network devops-taskboard_default \\
-                                -e SONAR_HOST_URL="http://taskflow-sonarqube:9000" \\
-                                sonarsource/sonar-scanner-cli \\
-                                -Dsonar.projectKey=TaskFlow \\
-                                -Dsonar.projectName='TaskFlow' \\
-                                -Dsonar.sources=. \\
-                                -Dsonar.javascript.lcov.reportPaths="auth-service/coverage/lcov.info,team-service/coverage/lcov.info,task-service/coverage/lcov.info,chat-service/coverage/lcov.info" \\
-                                -Dsonar.exclusions="**/node_modules/**,**/tests/**,**/coverage/**"
-                            """
+                        // Requires a Jenkins credential 'sonarqube-token' of type 'Secret text'
+                        // Generate the token in SonarQube: Administration > Security > Users > Tokens
+                        withCredentials([string(credentialsId: 'sonarqube-token', variable: 'SONAR_TOKEN')]) {
+                            script {
+                                // Using Docker to run SonarScanner ensures it works without Jenkins tool configuration
+                                sh """
+                                docker run --rm -v \$(pwd):/usr/src \\
+                                    --network devops-taskboard_default \\
+                                    -e SONAR_HOST_URL="http://taskflow-sonarqube:9000" \\
+                                    -e SONAR_TOKEN="\${SONAR_TOKEN}" \\
+                                    sonarsource/sonar-scanner-cli \\
+                                    -Dsonar.projectKey=TaskFlow \\
+                                    -Dsonar.projectName='TaskFlow' \\
+                                    -Dsonar.sources=. \\
+                                    -Dsonar.javascript.lcov.reportPaths="auth-service/coverage/lcov.info,team-service/coverage/lcov.info,task-service/coverage/lcov.info,chat-service/coverage/lcov.info" \\
+                                    -Dsonar.exclusions="**/node_modules/**,**/tests/**,**/coverage/**"
+                                """
+                            }
                         }
                     }
                 }

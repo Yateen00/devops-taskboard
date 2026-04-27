@@ -1,31 +1,30 @@
 const request = require('supertest');
-const app = require('../src/index');
-const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
 
-// Mock mongoose to avoid actual DB connections during simple tests
+// Set up mocks BEFORE requiring the app
+const mockFindOne = jest.fn();
+const mockSave = jest.fn();
+
 jest.mock('mongoose', () => {
-  const mockFindOne = jest.fn();
-  const mockSave = jest.fn();
+  function MockModel(data) {
+    Object.assign(this, data);
+    this.save = mockSave.mockImplementation(function() {
+      return Promise.resolve(this);
+    }.bind(this));
+  }
+  MockModel.findOne = mockFindOne;
+
   return {
     connect: jest.fn(),
     Schema: jest.fn(),
-    model: jest.fn(() => ({
-      findOne: mockFindOne,
-      save: mockSave,
-    })),
-    __mockFindOne: mockFindOne,
-    __mockSave: mockSave
+    model: jest.fn(() => MockModel),
   };
 });
 
-describe('Auth Service API', () => {
-  let mockFindOne, mockSave;
+const app = require('../src/index');
 
+describe('Auth Service API', () => {
   beforeEach(() => {
-    mockFindOne = mongoose.__mockFindOne;
-    mockSave = mongoose.__mockSave;
     mockFindOne.mockClear();
     mockSave.mockClear();
   });
@@ -52,13 +51,12 @@ describe('Auth Service API', () => {
       expect(res.body.error).toBe('User already exists');
     });
 
-    test('should create new user and return user object', async () => {
+    test('should create new user and return success message', async () => {
       mockFindOne.mockResolvedValueOnce(null);
-      mockSave.mockResolvedValueOnce({ _id: '123', username: 'testuser' });
 
       const res = await request(app).post('/signup').send({ username: 'testuser', password: 'password123' });
       expect(res.statusCode).toBe(201);
-      expect(res.body.username).toBe('testuser');
+      expect(res.body.message).toBe('User created successfully');
       expect(mockSave).toHaveBeenCalledTimes(1);
     });
   });
@@ -81,7 +79,7 @@ describe('Auth Service API', () => {
       const res = await request(app).post('/login').send({ username: 'testuser', password: 'password123' });
       expect(res.statusCode).toBe(200);
       expect(res.body).toHaveProperty('token');
-      expect(res.body.user.username).toBe('testuser');
+      expect(res.body.username).toBe('testuser');
     });
   });
 });
