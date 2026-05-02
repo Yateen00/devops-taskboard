@@ -36,16 +36,16 @@ export default function Chat({ teamId, userId, teamMembers }) {
   };
 
   return (
-    <div className="bg-white p-4 rounded shadow flex flex-col h-[60vh]">
-      <h3 className="font-bold border-b pb-2 mb-2">Team Chat</h3>
+    <div className="bg-gray-800 p-4 rounded border border-gray-700 shadow flex flex-col h-[60vh] text-gray-200">
+      <h3 className="font-bold border-b border-gray-700 pb-2 mb-2">Team Chat</h3>
       
       <div className="flex-1 overflow-y-auto space-y-2 mb-4 p-2">
         {messages.map((m, i) => (
           <div key={i} className={`flex flex-col ${m.senderId === userId ? 'items-end' : 'items-start'}`}>
-            <span className="text-xs text-gray-500 font-medium mb-1">
+            <span className="text-xs text-gray-400 font-medium mb-1">
               {m.senderId === userId ? 'You' : (teamMembers?.find(mem => mem.userId === m.senderId)?.username || m.senderId)}
             </span>
-            <div className={`p-2 rounded max-w-[80%] ${m.senderId === userId ? 'bg-blue-500 text-white' : 'bg-gray-100'}`}>
+            <div className={`p-2 rounded max-w-[80%] ${m.senderId === userId ? 'bg-blue-600 text-white' : 'bg-gray-700 text-gray-100'}`}>
               {m.text}
             </div>
           </div>
@@ -54,12 +54,12 @@ export default function Chat({ teamId, userId, teamMembers }) {
 
       <form onSubmit={handleSend} className="flex gap-2">
         <input 
-          className="border p-2 rounded flex-1" 
+          className="border border-gray-600 bg-gray-700 text-gray-100 p-2 rounded flex-1 focus:outline-none focus:border-blue-500" 
           placeholder="Type a message..." 
           value={text} 
           onChange={(e) => setText(e.target.value)} 
         />
-        <button className="bg-blue-600 text-white px-4 py-2 rounded">Send</button>
+        <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Send</button>
       </form>
     </div>
   );

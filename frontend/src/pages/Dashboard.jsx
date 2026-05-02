@@ -98,18 +98,18 @@ export default function Dashboard({ userId, username, token }) {
       <div className="space-y-8">
         
         <div>
-          <h2 className="text-2xl font-bold mb-6 text-gray-800 border-b pb-2">My Personal Board</h2>
-          <form onSubmit={handleCreatePersonalTask} className="mb-6 shadow-sm border border-gray-200 rounded overflow-hidden">
-            <div className="flex bg-white">
+          <h2 className="text-2xl font-bold mb-6 text-gray-100 border-b border-gray-700 pb-2">My Personal Board</h2>
+          <form onSubmit={handleCreatePersonalTask} className="mb-6 shadow-sm border border-gray-700 rounded overflow-hidden">
+            <div className="flex bg-gray-800">
               <input 
-                className="p-3 flex-1 outline-none" 
+                className="p-3 flex-1 bg-gray-800 text-gray-100 outline-none placeholder-gray-500" 
                 placeholder="What needs to be done?" 
                 value={newTaskTitle} 
                 onChange={(e) => setNewTaskTitle(e.target.value)} 
               />
               <input 
                 type="date"
-                className="p-3 border-l outline-none text-gray-600 text-sm"
+                className="p-3 border-l border-gray-700 bg-gray-800 outline-none text-gray-400 text-sm"
                 value={newTaskDeadline}
                 onChange={(e) => setNewTaskDeadline(e.target.value)}
               />
@@ -118,7 +118,7 @@ export default function Dashboard({ userId, username, token }) {
           </form>
 
           <div className="mb-8">
-            <h3 className="text-lg font-bold mb-3 text-gray-700">Active Tasks</h3>
+            <h3 className="text-lg font-bold mb-3 text-gray-300">Active Tasks</h3>
             <div className="grid gap-2">
               {myPersonalActive.map(task => (
                 <TaskItem 
@@ -163,7 +163,7 @@ export default function Dashboard({ userId, username, token }) {
 
       {/* Right Column: Global Team Tasks */}
       <div>
-        <h2 className="text-2xl font-bold mb-6 text-gray-800 border-b pb-2">Global Assigned Tasks (From Teams)</h2>
+        <h2 className="text-2xl font-bold mb-6 text-gray-100 border-b border-gray-700 pb-2">Global Assigned Tasks (From Teams)</h2>
         <div className="space-y-4">
           {myGlobalTasks.length === 0 ? (
             <p className="text-gray-500 italic">No team tasks assigned to you right now.</p>
@@ -171,14 +171,14 @@ export default function Dashboard({ userId, username, token }) {
             myGlobalTasks.map(task => {
               const team = teams.find(t => t._id === task.teamId);
               return (
-                <div key={task._id} className="bg-white p-5 rounded-lg shadow-sm border border-gray-100 flex justify-between items-center hover:shadow-md transition">
+                <div key={task._id} className="bg-gray-800 p-5 rounded-lg shadow-sm border border-gray-700 flex justify-between items-center hover:shadow-md transition">
                   <div>
-                    <h4 className="font-semibold text-lg text-gray-800">{task.title}</h4>
-                    <p className="text-sm text-gray-500 mt-1">
-                      From Team: <span className="font-medium text-blue-600">{team ? team.name : 'Unknown Team'}</span>
+                    <h4 className="font-semibold text-lg text-gray-100">{task.title}</h4>
+                    <p className="text-sm text-gray-400 mt-1">
+                      From Team: <span className="font-medium text-blue-400">{team ? team.name : 'Unknown Team'}</span>
                     </p>
                   </div>
-                  <Link to={team ? `/teams/${team._id}` : `/`} className="bg-blue-50 text-blue-600 px-4 py-2 rounded text-sm hover:bg-blue-100 transition">
+                  <Link to={team ? `/teams/${team._id}` : `/`} className="bg-blue-900/30 text-blue-400 border border-blue-900/50 px-4 py-2 rounded text-sm hover:bg-blue-900/50 transition">
                     View Board →
                   </Link>
                 </div>

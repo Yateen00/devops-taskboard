@@ -30,14 +30,14 @@ function App() {
 
   return (
     <Router>
-      <div className="flex min-h-screen bg-gray-50">
+      <div className="flex min-h-screen bg-gray-900 text-gray-100">
         {token && <Sidebar userId={userId} token={token} username={username} />}
         
         <div className={`flex-1 ${token ? 'ml-64' : ''}`}>
           {token && (
-            <div className="bg-white p-4 border-b flex justify-between items-center shadow-sm">
-              <h2 className="text-gray-600 font-medium">Welcome, {username}</h2>
-              <button onClick={handleLogout} className="text-sm bg-red-50 text-red-600 px-4 py-2 rounded-full hover:bg-red-100 transition">Log Out</button>
+            <div className="bg-gray-800 p-4 border-b border-gray-700 flex justify-between items-center shadow-sm">
+              <h2 className="text-gray-200 font-medium">Welcome, {username}</h2>
+              <button onClick={handleLogout} className="text-sm bg-red-900/30 text-red-400 px-4 py-2 rounded-full hover:bg-red-900/50 transition">Log Out</button>
             </div>
           )}
           
