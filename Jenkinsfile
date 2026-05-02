@@ -68,6 +68,12 @@ pipeline {
                                 curl -sL "https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-6.2.1.4610-linux-x64.zip" -o /tmp/sonar-scanner.zip
                                 cd /tmp && unzip -qo sonar-scanner.zip && mv sonar-scanner-*-linux-x64 sonar-scanner
                             fi
+
+                            # Fix lcov path inconsistencies since Jest generates them relative to service folder
+                            sed -i 's|SF:src/|SF:auth-service/src/|g' auth-service/coverage/lcov.info || true
+                            sed -i 's|SF:src/|SF:team-service/src/|g' team-service/coverage/lcov.info || true
+                            sed -i 's|SF:src/|SF:task-service/src/|g' task-service/coverage/lcov.info || true
+                            sed -i 's|SF:src/|SF:chat-service/src/|g' chat-service/coverage/lcov.info || true
                             '''
                             sh """
                             /tmp/sonar-scanner/bin/sonar-scanner \
