@@ -1,6 +1,4 @@
 const request = require('supertest');
-const { app } = require('../src/index');
-const mongoose = require('mongoose');
 
 jest.mock('mongoose', () => {
   const mockFind = jest.fn();
@@ -13,6 +11,9 @@ jest.mock('mongoose', () => {
     __mockFind: mockFind
   };
 });
+
+const { app } = require('../src/index');
+const mongoose = require('mongoose');
 
 describe('Chat Service API', () => {
   let mockFind;
@@ -45,10 +46,32 @@ describe('Chat Service API', () => {
 
       const res = await request(app).get('/messages/team1')
         .set('x-user-id', 'user1');
-        
       expect(res.statusCode).toBe(200);
       expect(res.body.length).toBe(1);
       expect(res.body[0].text).toBe('Hello');
+    });
+
+    test('should return empty array when no messages', async () => {
+      const mockQuery = {
+        sort: jest.fn().mockReturnValue([])
+      };
+      mockFind.mockReturnValueOnce(mockQuery);
+
+      const res = await request(app).get('/messages/team1')
+        .set('x-user-id', 'user1');
+      expect(res.statusCode).toBe(200);
+      expect(res.body.length).toBe(0);
+    });
+
+    test('should return 500 on database error', async () => {
+      mockFind.mockImplementationOnce(() => {
+        throw new Error('DB Error');
+      });
+
+      const res = await request(app).get('/messages/team1')
+        .set('x-user-id', 'user1');
+      expect(res.statusCode).toBe(500);
+      expect(res.body.error).toBe('Internal server error');
     });
   });
 });

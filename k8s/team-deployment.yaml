@@ -15,6 +15,7 @@ spec:
       containers:
       - name: team
         image: your-dockerhub-username/taskflow-team:latest
+        imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 3002
         env:

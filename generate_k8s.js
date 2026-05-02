@@ -21,13 +21,16 @@ spec:
       containers:
       - name: ${svc}
         image: your-dockerhub-username/taskflow-${svc}:latest
+        imagePullPolicy: IfNotPresent
         ports:
         - containerPort: ${ports[svc]}
         ${svc !== 'frontend' ? `env:
         - name: MONGO_URI
           value: mongodb://mongo-service:27017/taskflow
         - name: PORT
-          value: "${ports[svc]}"` : ''}
+          value: "${ports[svc]}"${svc === 'auth' ? `
+        - name: JWT_SECRET
+          value: "supersecret"` : ''}` : ''}
 ---
 apiVersion: v1
 kind: Service

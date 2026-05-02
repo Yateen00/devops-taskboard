@@ -1,6 +1,16 @@
 version: '3.8'
 
 services:
+  registry:
+    image: registry:2
+    container_name: taskflow-registry
+    ports:
+      - "5000:5000"
+    networks:
+      - default
+      - minikube
+    restart: unless-stopped
+
   mongodb:
     image: mongo:7.0
     container_name: taskflow-mongodb
@@ -77,6 +87,11 @@ services:
     volumes:
       - ${HOME}/taskflow_data/jenkins:/var/jenkins_home
       - /var/run/docker.sock:/var/run/docker.sock
+      - ${HOME}/.kube:/root/.kube:ro
+      - ${HOME}/.minikube:/home/yeet/.minikube:ro
+    networks:
+      - default
+      - minikube
     restart: unless-stopped
 
   sonarqube:
@@ -92,3 +107,7 @@ services:
       - ${HOME}/taskflow_data/sonarqube/extensions:/opt/sonarqube/extensions
       - ${HOME}/taskflow_data/sonarqube/logs:/opt/sonarqube/logs
     restart: unless-stopped
+
+networks:
+  minikube:
+    external: true

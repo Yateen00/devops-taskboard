@@ -15,6 +15,7 @@ spec:
       containers:
       - name: chat
         image: your-dockerhub-username/taskflow-chat:latest
+        imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 3004
         env:

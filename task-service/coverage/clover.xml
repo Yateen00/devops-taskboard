@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<coverage generated="1777743884268" clover="3.2.0">
+  <project timestamp="1777743884268" name="All files">
+    <metrics statements="91" coveredstatements="78" conditionals="40" coveredconditionals="33" methods="13" coveredmethods="10" elements="144" coveredelements="121" complexity="0" loc="91" ncloc="91" packages="2" files="2" classes="2"/>
+    <package name="src">
+      <metrics statements="87" coveredstatements="74" conditionals="40" coveredconditionals="33" methods="13" coveredmethods="10"/>
+      <file name="index.js" path="/mnt/Windows-SSD/Users/yvavi/yeet/coding/devops/devops-taskboard/task-service/src/index.js">
+        <metrics statements="87" coveredstatements="74" conditionals="40" coveredconditionals="33" methods="13" coveredmethods="10"/>
+        <line num="1" count="1" type="stmt"/>
+        <line num="2" count="1" type="stmt"/>
+        <line num="3" count="1" type="stmt"/>
+        <line num="4" count="1" type="stmt"/>
+        <line num="6" count="1" type="stmt"/>
+        <line num="7" count="1" type="stmt"/>
+        <line num="8" count="1" type="stmt"/>
+        <line num="10" count="1" type="stmt"/>
+        <line num="11" count="20" type="stmt"/>
+        <line num="12" count="20" type="stmt"/>
+        <line num="13" count="20" type="cond" truecount="2" falsecount="0"/>
+        <line num="14" count="18" type="stmt"/>
+        <line num="15" count="18" type="cond" truecount="1" falsecount="1"/>
+        <line num="16" count="18" type="stmt"/>
+        <line num="19" count="1" type="stmt"/>
+        <line num="20" count="3" type="stmt"/>
+        <line num="21" count="3" type="stmt"/>
+        <line num="22" count="3" type="cond" truecount="2" falsecount="0"/>
+        <line num="24" count="2" type="stmt"/>
+        <line num="35" count="2" type="stmt"/>
+        <line num="36" count="1" type="stmt"/>
+        <line num="38" count="1" type="stmt"/>
+        <line num="42" count="1" type="stmt"/>
+        <line num="43" count="2" type="stmt"/>
+        <line num="45" count="2" type="stmt"/>
+        <line num="51" count="1" type="stmt"/>
+        <line num="53" count="1" type="stmt"/>
+        <line num="58" count="1" type="stmt"/>
+        <line num="59" count="1" type="stmt"/>
+        <line num="60" count="0" type="stmt"/>
+        <line num="61" count="0" type="stmt"/>
+        <line num="62" count="0" type="stmt"/>
+        <line num="66" count="1" type="stmt"/>
+        <line num="67" count="4" type="stmt"/>
+        <line num="68" count="4" type="stmt"/>
+        <line num="71" count="4" type="stmt"/>
+        <line num="72" count="4" type="cond" truecount="2" falsecount="0"/>
+        <line num="73" count="4" type="cond" truecount="2" falsecount="0"/>
+        <line num="74" count="4" type="cond" truecount="2" falsecount="0"/>
+        <line num="75" count="4" type="cond" truecount="1" falsecount="1"/>
+        <line num="77" count="4" type="stmt"/>
+        <line num="78" count="3" type="cond" truecount="2" falsecount="0"/>
+        <line num="81" count="2" type="cond" truecount="2" falsecount="0"/>
+        <line num="82" count="1" type="stmt"/>
+        <line num="85" count="2" type="stmt"/>
+        <line num="87" count="1" type="stmt"/>
+        <line num="92" count="1" type="stmt"/>
+        <line num="93" count="1" type="stmt"/>
+        <line num="94" count="0" type="stmt"/>
+        <line num="95" count="0" type="stmt"/>
+        <line num="99" count="1" type="stmt"/>
+        <line num="100" count="3" type="stmt"/>
+        <line num="101" count="3" type="stmt"/>
+        <line num="102" count="2" type="cond" truecount="2" falsecount="0"/>
+        <line num="104" count="1" type="stmt"/>
+        <line num="106" count="1" type="stmt"/>
+        <line num="108" count="1" type="stmt"/>
+        <line num="112" count="1" type="stmt"/>
+        <line num="113" count="3" type="stmt"/>
+        <line num="114" count="3" type="stmt"/>
+        <line num="115" count="3" type="cond" truecount="2" falsecount="0"/>
+        <line num="117" count="2" type="stmt"/>
+        <line num="118" count="2" type="cond" truecount="2" falsecount="0"/>
+        <line num="120" count="1" type="stmt"/>
+        <line num="121" count="1" type="stmt"/>
+        <line num="122" count="1" type="stmt"/>
+        <line num="124" count="0" type="stmt"/>
+        <line num="128" count="1" type="stmt"/>
+        <line num="129" count="3" type="stmt"/>
+        <line num="130" count="3" type="stmt"/>
+        <line num="131" count="3" type="stmt"/>
+        <line num="132" count="3" type="cond" truecount="2" falsecount="0"/>
+        <line num="134" count="2" type="stmt"/>
+        <line num="135" count="2" type="cond" truecount="2" falsecount="0"/>
+        <line num="137" count="1" type="stmt"/>
+        <line num="138" count="1" type="stmt"/>
+        <line num="139" count="1" type="stmt"/>
+        <line num="141" count="0" type="stmt"/>
+        <line num="145" count="1" type="stmt"/>
+        <line num="147" count="1" type="cond" truecount="1" falsecount="1"/>
+        <line num="148" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="149" count="0" type="stmt"/>
+        <line num="150" count="0" type="stmt"/>
+        <line num="151" count="0" type="stmt"/>
+        <line num="153" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="154" count="0" type="stmt"/>
+        <line num="157" count="1" type="stmt"/>
+      </file>
+    </package>
+    <package name="src.models">
+      <metrics statements="4" coveredstatements="4" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+      <file name="Task.js" path="/mnt/Windows-SSD/Users/yvavi/yeet/coding/devops/devops-taskboard/task-service/src/models/Task.js">
+        <metrics statements="4" coveredstatements="4" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+        <line num="1" count="1" type="stmt"/>
+        <line num="3" count="1" type="stmt"/>
+        <line num="8" count="1" type="stmt"/>
+        <line num="25" count="1" type="stmt"/>
+      </file>
+    </package>
+  </project>
+</coverage>

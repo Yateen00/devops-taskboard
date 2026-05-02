@@ -1,7 +1,7 @@
 FROM jenkins/jenkins:lts-jdk17
 USER root
 
-# Install Docker CLI and Node.js/npm
+# Install Docker CLI and Node.js/npm and kubectl and minikube
 RUN apt-get update && \
     apt-get install -y docker.io curl ca-certificates gnupg && \
     curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
@@ -9,6 +9,10 @@ RUN apt-get update && \
     curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" && \
     chmod +x kubectl && \
     mv kubectl /usr/local/bin/ && \
+    curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64 && \
+    install minikube-linux-amd64 /usr/local/bin/minikube && \
+    rm minikube-linux-amd64 && \
     apt-get clean
 
 USER jenkins
+

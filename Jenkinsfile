@@ -5,6 +5,7 @@ pipeline {
         DOCKER_CREDS = credentials('docker-hub-credentials') // Needs to be configured in Jenkins
         IMAGE_TAG = "${env.BUILD_ID}"
         DOCKER_REGISTRY = "your-dockerhub-username" // Change this
+        MINIKUBE_HOME = "/home/yeet/.minikube"
     }
 
     stages {
@@ -75,11 +76,13 @@ pipeline {
                                 -Dsonar.projectKey=TaskFlow \
                                 -Dsonar.projectName='TaskFlow' \
                                 -Dsonar.projectBaseDir=\$(pwd) \
-                                -Dsonar.sources=auth-service/src,team-service/src,task-service/src,chat-service/src,frontend/src \
+                                -Dsonar.sources=auth-service/src,team-service/src,task-service/src,chat-service/src \
+                                -Dsonar.tests=auth-service/tests,team-service/tests,task-service/tests,chat-service/tests \
+                                -Dsonar.test.inclusions=**/*.test.js \
                                 -Dsonar.javascript.file.suffixes=.js,.jsx \
                                 -Dsonar.scm.disabled=true \
                                 -Dsonar.javascript.lcov.reportPaths=auth-service/coverage/lcov.info,team-service/coverage/lcov.info,task-service/coverage/lcov.info,chat-service/coverage/lcov.info \
-                                -Dsonar.exclusions="**/node_modules/**,**/coverage/**"
+                                -Dsonar.exclusions="**/node_modules/**,**/coverage/**,**/tests/**"
                             """
                         }
                     }
@@ -90,11 +93,17 @@ pipeline {
         stage('Build Docker Images') {
             steps {
                 script {
-                    sh "docker build -t ${DOCKER_REGISTRY}/taskflow-auth:${IMAGE_TAG} ./auth-service"
-                    sh "docker build -t ${DOCKER_REGISTRY}/taskflow-team:${IMAGE_TAG} ./team-service"
-                    sh "docker build -t ${DOCKER_REGISTRY}/taskflow-task:${IMAGE_TAG} ./task-service"
-                    sh "docker build -t ${DOCKER_REGISTRY}/taskflow-chat:${IMAGE_TAG} ./chat-service"
-                    sh "docker build -t ${DOCKER_REGISTRY}/taskflow-frontend:${IMAGE_TAG} ./frontend"
+                    withEnv([
+                        "DOCKER_HOST=tcp://minikube:2376",
+                        "DOCKER_TLS_VERIFY=1",
+                        "DOCKER_CERT_PATH=/home/yeet/.minikube/certs"
+                    ]) {
+                        sh "docker build -t taskflow-auth:${IMAGE_TAG} ./auth-service"
+                        sh "docker build -t taskflow-team:${IMAGE_TAG} ./team-service"
+                        sh "docker build -t taskflow-task:${IMAGE_TAG} ./task-service"
+                        sh "docker build -t taskflow-chat:${IMAGE_TAG} ./chat-service"
+                        sh "docker build -t taskflow-frontend:${IMAGE_TAG} ./frontend"
+                    }
                 }
             }
         }
@@ -102,21 +111,24 @@ pipeline {
         stage('Deploy to Kubernetes (Minikube)') {
             steps {
                 script {
-                    // Update image tags in k8s manifests before applying
-                    sh "sed -i 's|image: .*/taskflow-auth:.*|image: ${DOCKER_REGISTRY}/taskflow-auth:${IMAGE_TAG}|g' k8s/auth-deployment.yaml"
-                    sh "sed -i 's|image: .*/taskflow-team:.*|image: ${DOCKER_REGISTRY}/taskflow-team:${IMAGE_TAG}|g' k8s/team-deployment.yaml"
-                    sh "sed -i 's|image: .*/taskflow-task:.*|image: ${DOCKER_REGISTRY}/taskflow-task:${IMAGE_TAG}|g' k8s/task-deployment.yaml"
-                    sh "sed -i 's|image: .*/taskflow-chat:.*|image: ${DOCKER_REGISTRY}/taskflow-chat:${IMAGE_TAG}|g' k8s/chat-deployment.yaml"
-                    sh "sed -i 's|image: .*/taskflow-frontend:.*|image: ${DOCKER_REGISTRY}/taskflow-frontend:${IMAGE_TAG}|g' k8s/frontend-deployment.yaml"
+                    // Update image tags in k8s manifests before applying (note we use local images directly now)
+                    sh "sed -i 's|image: .*/taskflow-auth:.*|image: taskflow-auth:${IMAGE_TAG}|g' k8s/auth-deployment.yaml"
+                    sh "sed -i 's|image: .*/taskflow-team:.*|image: taskflow-team:${IMAGE_TAG}|g' k8s/team-deployment.yaml"
+                    sh "sed -i 's|image: .*/taskflow-task:.*|image: taskflow-task:${IMAGE_TAG}|g' k8s/task-deployment.yaml"
+                    sh "sed -i 's|image: .*/taskflow-chat:.*|image: taskflow-chat:${IMAGE_TAG}|g' k8s/chat-deployment.yaml"
+                    sh "sed -i 's|image: .*/taskflow-frontend:.*|image: taskflow-frontend:${IMAGE_TAG}|g' k8s/frontend-deployment.yaml"
                     
-                    // Apply manifests using kubectl (assumes kubeconfig is set up for Jenkins)
-                    // Note: Replaced with a simulation since Minikube is not installed on this host!
+                    // Apply manifests using kubectl
                     sh "echo 'Deploying to Kubernetes cluster...'"
-                    sh "echo 'deployment.apps/auth-deployment configured'"
-                    sh "echo 'deployment.apps/team-deployment configured'"
-                    sh "echo 'deployment.apps/task-deployment configured'"
-                    sh "echo 'deployment.apps/chat-deployment configured'"
-                    sh "echo 'deployment.apps/frontend-deployment configured'"
+                    sh "kubectl apply -f k8s/namespace.yaml || true"
+                    sh "kubectl apply -f k8s/ -n taskflow"
+                    
+                    // Verify rollout
+                    sh "kubectl rollout status deployment/auth-deployment -n taskflow"
+                    sh "kubectl rollout status deployment/team-deployment -n taskflow"
+                    sh "kubectl rollout status deployment/task-deployment -n taskflow"
+                    sh "kubectl rollout status deployment/chat-deployment -n taskflow"
+                    sh "kubectl rollout status deployment/frontend-deployment -n taskflow"
                     sh "echo 'Successfully deployed to Minikube!'"
                 }
             }

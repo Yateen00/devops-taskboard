@@ -44,6 +44,12 @@ describe('Auth Service API', () => {
       expect(res.body.error).toBe('Username and password required');
     });
 
+    test('should fail if only password is provided', async () => {
+      const res = await request(app).post('/signup').send({ password: 'pass123' });
+      expect(res.statusCode).toBe(400);
+      expect(res.body.error).toBe('Username and password required');
+    });
+
     test('should fail if username already exists', async () => {
       mockFindOne.mockResolvedValueOnce({ username: 'testuser' });
       const res = await request(app).post('/signup').send({ username: 'testuser', password: 'password123' });
@@ -59,12 +65,33 @@ describe('Auth Service API', () => {
       expect(res.body.message).toBe('User created successfully');
       expect(mockSave).toHaveBeenCalledTimes(1);
     });
+
+    test('should return 500 if save throws an error', async () => {
+      mockFindOne.mockResolvedValueOnce(null);
+      mockSave.mockRejectedValueOnce(new Error('DB Error'));
+
+      const res = await request(app).post('/signup').send({ username: 'testuser', password: 'password123' });
+      expect(res.statusCode).toBe(500);
+      expect(res.body.error).toBe('Internal server error');
+    });
   });
 
   describe('POST /login', () => {
     test('should fail if user not found', async () => {
       mockFindOne.mockResolvedValueOnce(null);
       const res = await request(app).post('/login').send({ username: 'wronguser', password: 'password123' });
+      expect(res.statusCode).toBe(400);
+      expect(res.body.error).toBe('Invalid credentials');
+    });
+
+    test('should fail if password is incorrect', async () => {
+      mockFindOne.mockResolvedValueOnce({ 
+        _id: '123', 
+        username: 'testuser',
+        password: await bcrypt.hash('correctpassword', 10)
+      });
+      
+      const res = await request(app).post('/login').send({ username: 'testuser', password: 'wrongpassword' });
       expect(res.statusCode).toBe(400);
       expect(res.body.error).toBe('Invalid credentials');
     });
@@ -80,6 +107,15 @@ describe('Auth Service API', () => {
       expect(res.statusCode).toBe(200);
       expect(res.body).toHaveProperty('token');
       expect(res.body.username).toBe('testuser');
+      expect(res.body.userId).toBe('123');
+    });
+
+    test('should return 500 if findOne throws an error', async () => {
+      mockFindOne.mockRejectedValueOnce(new Error('DB Error'));
+
+      const res = await request(app).post('/login').send({ username: 'testuser', password: 'password123' });
+      expect(res.statusCode).toBe(500);
+      expect(res.body.error).toBe('Internal server error');
     });
   });
 });
