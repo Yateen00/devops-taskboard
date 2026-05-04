@@ -12,8 +12,8 @@ export default function Sidebar({ userId, token, username }) {
 
   const fetchTeams = async () => {
     try {
-      const res = await axios.get(`${TEAM_URL}/teams/user`, { 
-        headers: { 'x-user-id': userId, 'x-username': username } 
+      const res = await axios.get(`${TEAM_URL}/teams/user`, {
+        headers: { 'x-user-id': userId, 'x-username': username }
       });
       setTeams(res.data);
     } catch (err) {
@@ -54,10 +54,10 @@ export default function Sidebar({ userId, token, username }) {
 
   return (
     <div className="w-64 bg-gray-900 text-white flex flex-col min-h-screen fixed left-0 top-0">
-      <div className="p-4 font-bold text-2xl border-b border-gray-700 tracking-wider">
+      <div className="p-4 font-bold text-2xl border-b border-gray-700 tracking-wider text-yellow-200">
         TaskFlow
       </div>
-      
+
       <div className="p-4">
         <h3 className="text-xs uppercase text-gray-500 font-semibold mb-2">Global Hub</h3>
         <Link to="/" className={`block py-2 px-3 rounded ${location.pathname === '/' ? 'bg-blue-600' : 'hover:bg-gray-800'}`}>
@@ -69,15 +69,15 @@ export default function Sidebar({ userId, token, username }) {
         <h3 className="text-xs uppercase text-gray-500 font-semibold mb-2 flex justify-between items-center">
           My Teams
         </h3>
-        
+
         {teams.length === 0 ? (
           <p className="text-xs text-gray-400 italic">No teams yet.</p>
         ) : (
           <ul className="space-y-1">
             {teams.map(team => (
               <li key={team._id}>
-                <Link 
-                  to={`/teams/${team._id}`} 
+                <Link
+                  to={`/teams/${team._id}`}
                   className={`block py-2 px-3 rounded truncate ${location.pathname === `/teams/${team._id}` ? 'bg-gray-700' : 'hover:bg-gray-800'}`}
                 >
                   <span className="opacity-75 mr-2">#</span> {team.name}
@@ -89,20 +89,20 @@ export default function Sidebar({ userId, token, username }) {
 
         <div className="mt-6 border-t border-gray-800 pt-4">
           <form onSubmit={handleJoinTeam} className="flex gap-1 mb-2">
-            <input 
-              className="bg-gray-800 border-none p-1.5 rounded flex-1 text-xs text-white outline-none focus:ring-1 focus:ring-blue-500" 
-              placeholder="Paste Join Code..." 
-              value={joinCode} 
-              onChange={(e) => setJoinCode(e.target.value)} 
+            <input
+              className="bg-gray-800 border-none p-1.5 rounded flex-1 text-xs text-white outline-none focus:ring-1 focus:ring-blue-500"
+              placeholder="Paste Join Code..."
+              value={joinCode}
+              onChange={(e) => setJoinCode(e.target.value)}
             />
             <button className="bg-blue-600 px-3 py-1.5 rounded text-xs font-semibold hover:bg-blue-500 transition">Join</button>
           </form>
           <form onSubmit={handleCreateTeam} className="flex gap-1">
-            <input 
-              className="bg-gray-800 border-none p-1.5 rounded flex-1 text-xs text-white outline-none focus:ring-1 focus:ring-blue-500" 
-              placeholder="New Team Name..." 
-              value={newTeamName} 
-              onChange={(e) => setNewTeamName(e.target.value)} 
+            <input
+              className="bg-gray-800 border-none p-1.5 rounded flex-1 text-xs text-white outline-none focus:ring-1 focus:ring-blue-500"
+              placeholder="New Team Name..."
+              value={newTeamName}
+              onChange={(e) => setNewTeamName(e.target.value)}
             />
             <button className="bg-blue-600 px-3 py-1.5 rounded text-xs font-semibold hover:bg-blue-500 transition">Add</button>
           </form>
